@@ -94,12 +94,13 @@ class IntegrationWidget(QtWidgets.QWidget):
         img_file_widget = self.integration_control_widget.img_control_widget.file_widget
         self.load_img_btn = img_file_widget.load_btn
         self.autoprocess_cb = img_file_widget.file_cb
-        self.img_step_file = img_file_widget.step_file_widget
-        self.img_step_series = img_file_widget.step_series_widget
+        self.img_step_file_widget = img_file_widget.step_file_widget
+        self.img_step_series_widget = img_file_widget.step_series_widget
         self.img_filename_txt = img_file_widget.file_txt
         self.img_directory_txt = img_file_widget.directory_txt
         self.img_directory_btn = img_file_widget.directory_btn
         self.file_info_btn = self.integration_control_widget.img_control_widget.file_info_btn
+        self.move_btn = self.integration_control_widget.img_control_widget.move_btn
         self.move_widget_btn = self.integration_control_widget.img_control_widget.move_btn
         self.img_batch_mode_integrate_rb = self.integration_control_widget.img_control_widget.batch_mode_integrate_rb
         self.img_batch_mode_add_rb = self.integration_control_widget.img_control_widget.batch_mode_add_rb

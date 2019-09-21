@@ -42,6 +42,9 @@ jcpds_path = os.path.join(data_path, 'jcpds')
 class JcpdsEditorControllerTest(QtTest):
     # SETUP
     #######################
+
+    # TODO: Test if jcpds editor defaults to jcpds4 version when version 4 is stated on first row of file, and when the new params are not given.
+
     def setUp(self) -> None:
         self.model = DioptasModel()
         self.model.calibration_model.is_calibrated = True
@@ -129,13 +132,15 @@ class JcpdsEditorControllerTest(QtTest):
     def test_updating_k0_parameter(self):
         self.phase_model.set_pressure(5, 30)
         previous_volume = self.jcpds_widget.lattice_eos_volume_txt.text()
-        enter_value_into_text_field(self.jcpds_widget.eos_K_txt, 300)
+        eos_type = self.jcpds_widget.eos_widget.eos_type_cb.currentText()
+        enter_value_into_text_field(self.jcpds_widget.eos_widget.txt_fields[eos_type]['K_0'], 300)
         self.assertNotEqual(previous_volume, self.jcpds_widget.lattice_eos_volume_txt.text())
 
     def test_updating_kp_parameter(self):
         self.phase_model.set_pressure(5, 30)
         previous_volume = self.jcpds_widget.lattice_eos_volume_txt.text()
-        enter_value_into_text_field(self.jcpds_widget.eos_Kp_txt, 5)
+        eos_type = self.jcpds_widget.eos_widget.eos_type_cb.currentText()
+        enter_value_into_text_field(self.jcpds_widget.eos_widget.txt_fields[eos_type]['Kprime_0'], 5)
         self.assertNotEqual(previous_volume, self.jcpds_widget.lattice_eos_volume_txt.text())
 
     def test_adding_a_reflection(self):

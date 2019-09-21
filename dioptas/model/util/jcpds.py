@@ -53,7 +53,6 @@ from .birch_murnaghan_thermal import JCPDS4
 from .eos_definitions import equations_of_state
 
 
-
 class jcpds_reflection:
     """
     Class that defines a reflection.
@@ -858,7 +857,7 @@ class jcpds(object):
         if eos in self.EOS:
             current_params = self.params['eos']
             new_params = self.EOS[eos].params
-            if current_params !=new_params:
+            if current_params != new_params:
                 self.params['eos'] = self.EOS[eos].params
             self.volume_calc = self.EOS[eos].volume
             self.pressure_calc = self.EOS[eos].pressure
@@ -889,10 +888,10 @@ class jcpds(object):
             for key in params:
                 self.set_eos_param(eos,key, params[key])
             
-            self.params['eos']= self.EOS[eos].params
+            self.params['eos'] = self.EOS[eos].params
             self.volume_calc = self.EOS[eos].volume
             self.pressure_calc = self.EOS[eos].pressure
-        #self.params['modified'] = False
+            # self.params['modified'] = False
         
     def set_eos_param(self, eos, key, param):
         if key == 'V_0':
@@ -911,7 +910,6 @@ class jcpds(object):
         for key in self.EOS:
             eos = self.EOS[key]
             eos.params['V_0'] = v0m
-        
 
     def set_param_to_jcpds4_field(self, key, param):
         
@@ -928,7 +926,7 @@ class jcpds(object):
             self.params['alpha_t0'] = param
         if 'd_alpha_dt' == key:
             self.params['d_alpha_dt'] = param
-        #self.params['modified'] = False
+        # self.params['modified'] = False
 
     def get_params_from_jcpds4_fields(self, params):
         if 'V_0' in params:
@@ -973,11 +971,12 @@ def repair_dict( d):
         item = d[key]
         NaN = float('nan')
         if type(item) == str:
-            d_new[key]=item
+            d_new[key] = item
         else:
             if not np.isnan(item):
-                d_new[key]=item
+                d_new[key] = item
     return d_new
+
 
 def lookup_jcpds_line(in_string,
                       pressure=0.,

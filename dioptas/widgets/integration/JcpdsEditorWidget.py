@@ -29,9 +29,11 @@ from ...model.util.HelperModule import convert_d_to_two_theta
 from functools import partial
 from ...model.util.eos_definitions import equations_of_state
 
+
 class EosGroupbox(QtWidgets.QWidget):
     param_edited_signal = QtCore.Signal(dict)
     eos_type_edited_signal = QtCore.Signal(dict)
+
     def __init__(self, equation_of_state='jcpds4'):
         super().__init__()
         self.equation_of_state = equation_of_state
@@ -69,16 +71,16 @@ class EosGroupbox(QtWidgets.QWidget):
                 unit = param['unit']
                 if unit == "Pa":
                     unit = "GPa"
-                    self.scales[param_key]=1e9
-                text_field =  NumberTextField()
+                    self.scales[param_key] = 1e9
+                text_field = NumberTextField()
                 text_field.setText('0')
-                txt_fields[param_key]=text_field
+                txt_fields[param_key] = text_field
                 self.add_field(_eos_layout, text_field, symbol+':', unit, row, 0)
                 text_field.returnPressed.connect(partial(
                         self.text_field_edited_callback, 
-                        {'eos':key,'param_key':param_key}))
+                        {'eos': key, 'param_key': param_key}))
                 row = row + 1
-            self.txt_fields[key]=txt_fields
+            self.txt_fields[key] = txt_fields
             eos_widget.setLayout(_eos_layout)    
             self.EOS_widgets[key] = eos_widget
             eos_widget.setStyleSheet("""
@@ -99,7 +101,7 @@ class EosGroupbox(QtWidgets.QWidget):
 
     def get_current_eos_info(self):
         selected_eos = self.eos_type_cb.currentText()
-        eos_name = 'EOS: ' +self.EOS_params[selected_eos]['name']
+        eos_name = 'EOS: ' + self.EOS_params[selected_eos]['name']
         ref = self.EOS_params[selected_eos]['reference']
         eos = self.EOS_params[selected_eos]['params']
         desc = eos_name + '<br><br>'
@@ -120,7 +122,7 @@ class EosGroupbox(QtWidgets.QWidget):
                 d = self.dictionarize_fields(_txt_fields)
                 '''
                 d = {}
-                d['equation_of_state']= key
+                d['equation_of_state'] = key
                 self.eos_type_edited_signal.emit(d)
 
     def _change_eos_layout(self, key):
@@ -137,7 +139,7 @@ class EosGroupbox(QtWidgets.QWidget):
             val = float(str(field.text()))
             if key in self.scales:
                 val = float(str(val)) * self.scales[key]     
-            d[key]= val
+            d[key] = val
         return d
 
     def text_field_edited_callback(self, eos_param_key):
@@ -147,8 +149,7 @@ class EosGroupbox(QtWidgets.QWidget):
         val = self.txt_fields[self.equation_of_state][key].text()
         if key in self.scales:
             val = float(str(val)) * self.scales[key]
-        self.param_edited_signal.emit({key:val})
-
+        self.param_edited_signal.emit({key: val})
 
     def add_field(self, layout, widget, label_str, unit, x, y):
         layout.addWidget(LabelAlignRight(label_str), x, y)
@@ -175,6 +176,7 @@ class EosGroupbox(QtWidgets.QWidget):
                 fields[key].setText(str(param))
         self.blockSignals(False)
 
+
 class JcpdsEditorWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(JcpdsEditorWidget, self).__init__(parent)
@@ -191,7 +193,7 @@ class JcpdsEditorWidget(QtWidgets.QWidget):
         self.comments_txt = QtWidgets.QLineEdit('')
         self._file_layout.addWidget(self.filename_txt, 0, 1)
         self._file_layout.addWidget(self.comments_txt, 1, 1)
-        self._layout.addLayout((self._file_layout))
+        self._layout.addLayout(self._file_layout)
 
         self.lattice_parameters_gb = QtWidgets.QGroupBox('Lattice Parameters')
         self._lattice_parameters_layout = QtWidgets.QVBoxLayout()
@@ -274,7 +276,6 @@ class JcpdsEditorWidget(QtWidgets.QWidget):
 
         self.add_field(self._parameters_layout, self.lattice_eos_molar_volume_txt, 'V<sub>m</sub>:', u'm³/mol', 5, 3)
         self.add_field(self._parameters_layout, self.lattice_eos_z_txt, 'Z:', u'', 5, 0)
-        
 
         self._lattice_parameters_layout.addLayout(self._parameters_layout)
         self.lattice_parameters_gb.setLayout(self._lattice_parameters_layout)
@@ -341,7 +342,7 @@ class JcpdsEditorWidget(QtWidgets.QWidget):
         self.setWindowFlags(QtCore.Qt.Tool)
 
         # buggy in macosx Mojave, don't use
-        #self.setAttribute(QtCore.Qt.WA_MacAlwaysShowToolWindow)
+        # self.setAttribute(QtCore.Qt.WA_MacAlwaysShowToolWindow)
 
     def raise_widget(self):
         self.show()
