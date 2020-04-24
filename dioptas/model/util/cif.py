@@ -67,7 +67,10 @@ class CifConverter(object):
         :rtype: jcpds
         """
         file_url = 'file:' + pathname2url(filename)
-        cif_file = ReadCif(file_url)
+        try:
+            cif_file = ReadCif(file_url)
+        except:
+            return None
         cif_phase = CifPhase(cif_file[cif_file.keys()[0]])
         jcpds_phase = self.convert_cif_phase_to_jcpds(cif_phase)
         jcpds_phase.filename = filename

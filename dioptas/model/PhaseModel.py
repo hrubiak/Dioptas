@@ -89,8 +89,9 @@ class PhaseModel(QtCore.QObject):
         try:
             cif_converter = CifConverter(0.31, minimum_d_spacing, intensity_cutoff)
             jcpds_object = cif_converter.convert_cif_to_jcpds(filename)
-            self.phase_files.append(filename)
-            self.add_jcpds_object(jcpds_object)
+            if jcpds_object is not None:
+                self.phase_files.append(filename)
+                self.add_jcpds_object(jcpds_object)
         except (ZeroDivisionError, UnboundLocalError, ValueError) as e:
             print(e)
             raise PhaseLoadError(filename)
