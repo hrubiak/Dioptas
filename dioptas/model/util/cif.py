@@ -115,11 +115,74 @@ class CifConverter(object):
         jcpds_phase.params['alpha0'] = cif_phase.alpha
         jcpds_phase.params['beta0'] = cif_phase.beta
         jcpds_phase.params['gamma0'] = cif_phase.gamma
-        jcpds_phase.params['v0'] = cif_phase.volume
         jcpds_phase.params['symmetry'] = cif_phase.symmetry
+
+        jcpds_phase.params['v0'] = self.compute_v0(jcpds_phase.params)
+        
         jcpds_phase.params['comments'] = [cif_phase.comments]
 
         return jcpds_phase
+
+    def compute_v0(self, phase_params):
+        """
+        Computes the unit cell volume of the material at zero pressure and
+
+        Procedure:
+           This procedure computes the unit cell volume from the unit cell
+           parameters.
+
+        Example:
+           Compute the zero pressure and temperature unit cell volume of alumina
+           j = jcpds()
+           j.read_file('alumina.jcpds')
+           j.compute_v0()
+        """
+        if phase_params['symmetry'] == 'CUBIC':
+            phase_params['b0'] = phase_params['a0']
+            phase_params['c0'] = phase_params['a0']
+            phase_params['alpha0'] = 90.
+            phase_params['beta0'] = 90.
+            phase_params['gamma0'] = 90.
+
+        elif phase_params['symmetry'] == 'TETRAGONAL':
+            phase_params['b0'] = phase_params['a0']
+            phase_params['alpha0'] = 90.
+            phase_params['beta0'] = 90.
+            phase_params['gamma0'] = 90.
+
+        elif phase_params['symmetry'] == 'ORTHORHOMBIC':
+            phase_params['alpha0'] = 90.
+            phase_params['beta0'] = 90.
+            phase_params['gamma0'] = 90.
+
+        elif phase_params['symmetry'] == 'HEXAGONAL' or phase_params['symmetry'] == "TRIGONAL":
+            phase_params['b0'] = phase_params['a0']
+            phase_params['alpha0'] = 90.
+            phase_params['beta0'] = 90.
+            phase_params['gamma0'] = 120.
+
+        elif phase_params['symmetry'] == 'RHOMBOHEDRAL':
+            phase_params['b0'] = phase_params['a0']
+            phase_params['c0'] = phase_params['a0']
+            phase_params['beta0'] = phase_params['alpha0']
+            phase_params['gamma0'] = phase_params['alpha0']
+
+        elif phase_params['symmetry'] == 'MONOCLINIC':
+            phase_params['alpha0'] = 90.
+            phase_params['gamma0'] = 90.
+
+        elif phase_params['symmetry'] == 'TRICLINIC':
+            pass
+
+        dtor = np.pi / 180.
+        return  phase_params['a0'] * phase_params['b0'] * phase_params['c0'] * \
+                   np.sqrt(1. -
+                           np.cos(phase_params['alpha0'] * dtor) ** 2 -
+                           np.cos(phase_params['beta0'] * dtor) ** 2 -
+                           np.cos(phase_params['gamma0'] * dtor) ** 2 +
+                           2. * (np.cos(phase_params['alpha0'] * dtor) *
+                                 np.cos(phase_params['beta0'] * dtor) *
+                                 np.cos(phase_params['gamma0'] * dtor)))
 
     def _calculate_hkl_within_sphere_and_min_d_spacing(self, cif_phase):
         """
@@ -349,7 +412,7 @@ class CifPhase(object):
         self.beta = convert_cif_number_to_float(cif_dictionary['_cell_angle_beta'])
         self.gamma = convert_cif_number_to_float(cif_dictionary['_cell_angle_gamma'])
 
-        self.volume = convert_cif_number_to_float(cif_dictionary['_cell_volume'])
+        #self.volume = convert_cif_number_to_float(cif_dictionary['_cell_volume'])
 
         if '_symmetry_space_group_name_h-m' in cif_dictionary.keys():
             self.space_group = cif_dictionary['_symmetry_space_group_name_h-m']
@@ -359,6 +422,8 @@ class CifPhase(object):
             self.space_group = None
 
         self.space_group_number = cif_dictionary.get('_symmetry_Int_Tables_number')
+        if self.space_group_number is None:
+            self.space_group_number = cif_dictionary.get('_space_group_IT_number')
         if self.space_group_number is not None:
             self.space_group_number = int(self.space_group_number)
         self.symmetry = self.get_symmetry_from_space_group_number(self.space_group_number)
