@@ -126,6 +126,7 @@ class CifConverter(object):
     def compute_v0(self, phase_params):
         """
         Computes the unit cell volume of the material at zero pressure and
+        temperature from the unit cell parameters.
 
         Procedure:
            This procedure computes the unit cell volume from the unit cell
