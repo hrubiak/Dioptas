@@ -158,7 +158,8 @@ class ImgModel(QtCore.QObject):
             if data:
                 return data
         else:
-            raise IOError("No handler found for given image")
+
+            print("No handler found for given image")
 
     def set_loadable_attributes(self, loaded_data):
         """
