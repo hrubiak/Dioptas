@@ -94,6 +94,14 @@ def excepthook(exc_type, exc_value, traceback_obj):
 
 
 def main():
+    import PyQt5
+    from PyQt5 import QtCore
+    if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+      PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+
+    if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+        PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+    
     app = QtWidgets.QApplication([])
     # sys.excepthook = excepthook
     from sys import platform as _platform
