@@ -284,7 +284,10 @@ def calculate_color(ind):
     s = 0.8
     v = 0.8
     h = (0.19 * (ind + 2)) % 1
-    return np.array(hsv_to_rgb(h, s, v)) * 255
+    #print ((h,s,v))
+    r, g, b = hsv_to_rgb(h, s, v)
+    #print((r,g,b))
+    return np.array([r,g,b]) * 255
 
 
 def convert_d_to_two_theta(d, wavelength):
