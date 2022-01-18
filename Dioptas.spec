@@ -23,6 +23,7 @@ block_cipher = None
 import sys
 import os
 
+sys.setrecursionlimit(5000)
 
 folder = os.getcwd()
 

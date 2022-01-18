@@ -19,6 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
+import imp
 
 from ._version import get_versions
 
@@ -31,6 +32,8 @@ if __version__ == "0+unknown":
 import sys
 import os
 import time
+import PyQt5
+from PyQt5 import QtCore
 
 try:
     from cStringIO import StringIO
@@ -94,6 +97,11 @@ def excepthook(exc_type, exc_value, traceback_obj):
 
 
 def main():
+    if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+        PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+    if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+        PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+    QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_ShareOpenGLContexts)
     app = QtWidgets.QApplication([])
     # sys.excepthook = excepthook
     from sys import platform as _platform
