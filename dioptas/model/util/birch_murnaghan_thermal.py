@@ -7,7 +7,7 @@ import numpy as np
 import scipy.optimize as opt
 
 from burnman.eos import equation_of_state as eos
-from burnman.tools import bracket
+#from burnman.tools import bracket
 import warnings
 #from burnman.eos.birch_murnaghan import bulk_modulus, birch_murnaghan, volume
 
@@ -59,7 +59,7 @@ class JCPDS4(eos.EquationOfState):
                         params['alpha_t'] * params['K_0'] * (temperature - 298.)
                 self.params = params
                 res = opt.minimize(self.bm3_inverse, 1.)
-                v = self.params['V_0'] / np.float(res.x)
+                v = self.params['V_0'] / float(res.x)
                 return v
         
     def bm3_inverse(self, v0_v):

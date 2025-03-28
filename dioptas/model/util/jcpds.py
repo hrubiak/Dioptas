@@ -50,6 +50,7 @@ import os
 from burnman.eos.equation_of_state import EquationOfState
 from burnman.eos.helper import create as create_eos
 from .birch_murnaghan_thermal import JCPDS4
+from .dewaele2006_thermal import Dewaele2006
 from .eos_definitions import equations_of_state
 
 
@@ -585,6 +586,8 @@ class jcpds(object):
             self.params['temperature'] = temperature
 
         # Assume 0 K really means room T
+        if temperature is None:
+            temperature = 298
         if temperature == 0: temperature = 298.
         # Compute values of K0, K0P and alphat at this temperature
         # Assume 0 K really means room T
@@ -599,17 +602,90 @@ class jcpds(object):
                 params = self.get_params_from_jcpds4_fields(self.jcpds4_params_template)
                 self.set_EOS(params)
 
-        try:
-            # Note: params['eos'] values are in SI units, i.e. Pa, not GPa
-            volume_m = self.volume_calc(pressure*1e9,temperature,self.params['eos'])
-            volume = self.Vm_to_V(volume_m)
-            self.params['vm'] = volume_m 
-        except:
-            volume = self.params['v0']
         
+        #self.test_func()
+
+            # Note: params['eos'] values are in SI units, i.e. Pa, not GPa
+        volume_m = self.volume_calc(pressure*1e9,temperature,self.params['eos'])
+        volume = self.Vm_to_V(volume_m)
+        self.params['vm'] = volume_m 
+
         self.params['v'] = volume
 
+    def hexagonal_lattice_parameters(V_mol, c_over_a):
+        '''
+        # Example:
+        # V_mol = 6.753e-06 m³/mol and c/a ~ 1.6
+        a, b, c = hexagonal_lattice_parameters(6.753e-06, 1.6)
+        print("a =", a, "Å, b =", b, "Å, c =", c, "Å")
+        '''
+        N_A = 6.022e23
+        # The conventional hcp unit cell (with 2 atoms) has volume:
+        V_cell = 2 * V_mol / N_A  # in m³
+        # For a hexagonal cell: V_cell = (sqrt(3)/2) * a² * c, with c = (c_over_a)*a.
+        # Hence, a³ = (2 * V_cell) / (sqrt(3) * c_over_a)
+        a_m = ((2 * V_cell) / (np.sqrt(3) * c_over_a)) ** (1/3)
+        a = a_m * 1e10  # convert m to Å
+        b = a
+        c = c_over_a * a
+        return a, b, c
     
+    def hexagonal_volume(a, b, c):
+        """
+        Compute the volume of a hexagonal unit cell given lattice parameters a, b, and c.
+        For a hexagonal lattice (where a = b), the volume is given by:
+            V = (sqrt(3)/2) * a² * c
+        Parameters:
+        a, b, c : float
+            Lattice parameters in the same units (e.g., Å).
+        Returns:
+        Volume in the same cubic units (e.g., Å³).
+
+        # Example usage:
+        a = 2.95  # Å
+        c = 4.72  # Å (c/a ≈ 1.6)
+        vol = hexagonal_volume(a, a, c)
+        print("Hexagonal unit cell volume: {:.2f} Å³".format(vol))
+        """
+        import numpy as np
+        if not np.isclose(a, b):
+            raise ValueError("For a hexagonal lattice, a should equal b.")
+        return (np.sqrt(3) / 2.0) * a**2 * c
+
+    
+
+    
+    '''def test_func(self):
+         # Test parameters (example values from our dictionary)
+        params = {
+            'V_0': 6.76e-6,          # cm³/mol
+            'K_0': 163400000000.0,         # GPa
+            'Kprime_0': 5.38,
+            'Debye_0': 417.0,     # K
+            'grueneisen_0': 1.875,
+            'gamma_inf': 1.305,
+            'q_0': 3.289,         # our beta
+            'a0': 3.7e-5,
+            'm_anh': 1.87,
+            'e0': 1.95e-4,
+            'g_el': 1.339,
+            'molar_mass': 5.5845e-2, # kg/mol
+            'n': 1
+        }
+
+        # Create an instance of the EOS class
+        eos_instance = Dewaele2006()
+
+        # Baseline test: Vinet pressure at V = V_0 should be ~0 GPa
+        print("Vinet baseline at V=V_0:", eos_instance.vinet_300K_pressure(params['V_0'], params['V_0'], params['K_0'], params['Kprime_0']))
+
+        # Thermal pressure difference at 300K should be ~0
+        print("Thermal pressure difference at 300K:", eos_instance.thermal_pressure_zero_at_300K(params['V_0'], 300.0, params['V_0'], params['Debye_0'], params['grueneisen_0'], params['gamma_inf'], params['q_0'], params['a0'], params['m_anh'], params['e0'], params['g_el']))
+
+        # Try computing volume at 1 GPa and 300K:
+        vol_m3 = eos_instance.volume(1e9, 300.0, params)  # 1e9 Pa = 1 GPa
+        print("Computed volume at 1 GPa, 300K (in m³/mol ):", vol_m3)'''
+
 
     def compute_d0(self):
         """
@@ -713,7 +789,7 @@ class jcpds(object):
 
         # Assume each cell dimension changes by the same fractional amount = cube
         # root of volume change ratio
-        ratio = np.float((self.params['v'] / self.params['v0']) ** (1.0 / 3.0))
+        ratio = float((self.params['v'] / self.params['v0']) ** (1.0 / 3.0))
         self.params['a'] = self.params['a0'] * ratio
         self.params['b'] = self.params['b0'] * ratio
         self.params['c'] = self.params['c0'] * ratio
@@ -876,9 +952,18 @@ class jcpds(object):
                     params[key] = required_params[key]
             if eos == 'jcpds4':
                 self.EOS[eos] = JCPDS4()
+            elif eos == 'dewaele2006':
+                self.EOS[eos] = Dewaele2006()
             else:
-                self.EOS[eos] = create_eos(eos)
+                try:
+                    self.EOS[eos] = create_eos(eos)
+                except Exception as e:
+                    if str(e).startswith("unsupported material method"):
+                        print("Caught specific unsupported material method error:", e)
+                    else:
+                        print("Caught some other exception:", e)
             params = self.get_params_from_jcpds4_fields(params)
+
             try:
                 # params need to include the require fields
                 self.EOS[eos].validate_parameters(params)
@@ -894,13 +979,16 @@ class jcpds(object):
             # self.params['modified'] = False
         
     def set_eos_param(self, eos, key, param):
-        if key == 'V_0':
-            # V_0 is computed from the lattice parameters, V_0 in EOS is ignored
-            param = self.V_to_Vm(self.params['v0'])
-        if hasattr(self.EOS[eos], 'params'):
-            self.EOS[eos].params[key] = param
-        else:
-            self.EOS[eos].params = {key:param}
+        '''if use_abc:
+            if key == 'V_0':
+                # V_0 is computed from the lattice parameters, V_0 in EOS is ignored
+                param = self.V_to_Vm(self.params['v0'])'''
+        if eos in self.EOS: 
+            
+            if hasattr(self.EOS[eos], 'params'):
+                self.EOS[eos].params[key] = param
+            else:
+                self.EOS[eos].params = {key:param}
         # for jcpds4 legacy support
         self.set_param_to_jcpds4_field(key, param)
 

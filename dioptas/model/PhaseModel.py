@@ -151,6 +151,7 @@ class PhaseModel(QtCore.QObject):
         """
         if self.same_conditions:
             for j in range(len(self.phases)):
+                
                 self._set_pressure(j, pressure)
                 self.phase_changed.emit(j)
         else:

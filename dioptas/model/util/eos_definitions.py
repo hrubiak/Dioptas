@@ -89,5 +89,96 @@ equations_of_state = {'jcpds4':{
                                      'desc':u'Shear strain derivative of the Gruneisen parameter',
                                      'unit':u''}
                         }},
+
+                        'dewaele2006': {
+                            'name': 'Dewaele et al. (2006) Mie–Grüneisen–Debye EOS',
+                            'reference': 'Dewaele et al., Phys. Rev. Lett. 97, 215504 (2006)',
+                            'comment': ('EOS formulation using a 300 K Vinet baseline with a thermal-pressure model '
+                                        'that is defined to be zero at 300 K. Bulk modulus is specified in GPa.'),
+                            'params': {
+                                # --- Baseline (Vinet) parameters ---
+                                'V_0': {
+                                    'symbol': u'V<sub>0</sub>',
+                                    'desc': u'Volume at reference P=10⁵ Pa, T=300 K',
+                                    'unit': u'cm³/mol',
+                                    'default': 6.76e-6
+                                },
+                                'K_0': {
+                                    'symbol': u'K<sub>0</sub>',
+                                    'desc': u'Isothermal bulk modulus at reference conditions (300 K)',
+                                    'unit': u'GPa',
+                                    'default': 1.634e11
+                                },
+                                'Kprime_0': {
+                                    'symbol': u"K'<sub>0</sub>",
+                                    'desc': u'Pressure derivative of K<sub>0</sub>',
+                                    'unit': u'',
+                                    'default': 5.38
+                                },
+                                # --- Thermal model parameters ---
+                                'theta_0': {
+                                    'symbol': u'\u03B8<sub>0</sub>',
+                                    'desc': u'Debye temperature at reference volume',
+                                    'unit': u'K',
+                                    'default': 417.0
+                                },
+                                'gamma_0': {
+                                    'symbol': u'\u03B3<sub>0</sub>',
+                                    'desc': u'Grüneisen parameter at P=10⁵ Pa, T=300 K',
+                                    'unit': u'',
+                                    'default': 1.875
+                                },
+                                'gamma_inf': {
+                                    'symbol': u'\u03B3<sub>\u221E</sub>',
+                                    'desc': u'High-compression limit of the Grüneisen parameter',
+                                    'unit': u'',
+                                    'default': 1.305
+                                },
+                                'beta': {
+                                    'symbol': u'\u03B2',
+                                    'desc': u'Exponent controlling the volume dependence of \u03B3 (β = γ₀/(γ₀−γ∞))',
+                                    'unit': u'',
+                                    'default': 3.289
+                                },
+                                'a0': {
+                                    'symbol': u'a<sub>0</sub>',
+                                    'desc': u'Coefficient for anharmonic term',
+                                    'unit': u'K<sup>-1</sup>',
+                                    'default': 3.7e-5
+                                },
+                                'm_anh': {
+                                    'symbol': u'm',
+                                    'desc': u'Exponent for anharmonic term',
+                                    'unit': u'',
+                                    'default': 1.87
+                                },
+                                'e0': {
+                                    'symbol': u'e<sub>0</sub>',
+                                    'desc': u'Coefficient for electronic term',
+                                    'unit': u'K<sup>-1</sup>',
+                                    'default': 1.95e-4
+                                },
+                                'g_el': {
+                                    'symbol': u'g',
+                                    'desc': u'Exponent for electronic term',
+                                    'unit': u'',
+                                    'default': 1.339
+                                },
+                                # --- Composition parameters ---
+                                'molar_mass': {
+                                    'symbol': u'\u03BC',
+                                    'desc': u'Mass per mole of formula units',
+                                    'unit': u'kg/mol',
+                                    # For pure Fe: 55.845 g/mol = 5.5845e-2 kg/mol
+                                    'default': 5.5845e-2
+                                },
+                                'n': {
+                                    'symbol': u'n',
+                                    'desc': u'Number of atoms per formula unit',
+                                    'unit': u'',
+                                    'default': 1
+                                }
+                            }
+                        }
                     
                     }

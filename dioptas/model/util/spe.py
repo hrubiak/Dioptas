@@ -133,7 +133,7 @@ class SpeFile(object):
 
     def _read_exposure_from_header(self):
         """Reads the exposure time from the header into the exposure_time field"""
-        self.exposure_time = self._read_at(10, 1, np.float32)
+        self.exposure_time = self._read_at(10, 1, float32)
         self.exposure_time = self.exposure_time[0]
 
     def _read_detector_from_header(self):
@@ -144,11 +144,11 @@ class SpeFile(object):
 
     def _read_grating_from_header(self):
         """Reads grating position from the header into the grating field"""
-        self.grating = str(self._read_at(650, 1, np.float32)[0])
+        self.grating = str(self._read_at(650, 1, float32)[0])
 
     def _read_center_wavelength_from_header(self):
         """Reads center wavelength position from the header into the center_wavelength field"""
-        self.center_wavelength = float(self._read_at(72, 1, np.float32)[0])
+        self.center_wavelength = float(self._read_at(72, 1, float32)[0])
 
     def _read_roi_from_header(self):
         return
@@ -198,22 +198,22 @@ class SpeFile(object):
         if len(self.dom.getElementsByTagName('Experiment')) != 1:  # check if it is a real v3.0 file
             if len(self.dom.getElementsByTagName('ShutterTiming')) == 1:  # check if it is a pixis detector
                 self._exposure_time = self.dom.getElementsByTagName('ExposureTime')[0].childNodes[0]
-                self.exposure_time = np.float(self._exposure_time.toxml()) / 1000.0
+                self.exposure_time = float(self._exposure_time.toxml()) / 1000.0
             else:
                 # self._exposure_time = self.dom.getElementsByTagName('ReadoutControl')[0]. \
                 #     getElementsByTagName('Time')[0].childNodes[0].nodeValue
-                # self._exposure_time = np.float(self._exposure_time)/1000000000
+                # self._exposure_time = float(self._exposure_time)/1000000000
                 self._exposure_time = self.dom.getElementsByTagName('Gating')[0]. \
                     getElementsByTagName('RepetitiveGate')[0].getElementsByTagName('Pulse')[0].getAttribute('width')
-                self._exposure_time = np.float(self._exposure_time)/1000000000
+                self._exposure_time = float(self._exposure_time)/1000000000
                 self._accumulations = self.dom.getElementsByTagName('Accumulations')[0].childNodes[0].nodeValue
-                self.exposure_time = np.float(self._exposure_time) * np.float(self._accumulations)
+                self.exposure_time = float(self._exposure_time) * float(self._accumulations)
         else:  # this is searching for legacy experiment:
             self._exposure_time = self.dom.getElementsByTagName('LegacyExperiment')[0]. \
                 getElementsByTagName('Experiment')[0]. \
                 getElementsByTagName('CollectionParameters')[0]. \
                 getElementsByTagName('Exposure')[0].attributes["value"].value
-            self.exposure_time = np.float(self._exposure_time.split()[0])
+            self.exposure_time = float(self._exposure_time.split()[0])
 
     def _read_detector_from_dom(self):
         """Reads the detector information from the dom object"""
@@ -331,7 +331,7 @@ class SpeFile(object):
         if pos == None:
             pos = self._fid.tell()
         if self._data_type == 0:
-            img = self._read_at(pos, self._xdim * self._ydim, np.float32)
+            img = self._read_at(pos, self._xdim * self._ydim, float32)
         elif self._data_type == 1:
             img = self._read_at(pos, self._xdim * self._ydim, np.int32)
         elif self._data_type == 2:

@@ -216,7 +216,7 @@ class CalibrationModel(QtCore.QObject):
         tth_calibrant_list = self.calibrant.get_2th()
         if ring_index >= len(tth_calibrant_list):
             raise NotEnoughSpacingsInCalibrant()
-        tth_calibrant = np.float(tth_calibrant_list[ring_index])
+        tth_calibrant = float(tth_calibrant_list[ring_index])
 
         # get the calculated two theta values for the whole image
         tth_array = self.pattern_geometry.twoThetaArray(self.img_model._img_data.shape)
@@ -230,7 +230,7 @@ class CalibrationModel(QtCore.QObject):
             mask = ring_mask
 
         # calculate the mean and standard deviation of this area
-        sub_data = np.array(self.img_model._img_data.ravel()[np.where(mask.ravel())], dtype=np.float64)
+        sub_data = np.array(self.img_model._img_data.ravel()[np.where(mask.ravel())], dtype=float64)
         sub_data[np.where(sub_data > upper_limit)] = np.NaN
         mean = np.nanmean(sub_data)
         std = np.nanstd(sub_data)
