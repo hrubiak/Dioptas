@@ -172,7 +172,7 @@ class CalibrationController(object):
                                     directory=self.model.working_directories['image'],
                                     )
 
-        if filename is not '':
+        if filename  != '':
             self.model.working_directories['image'] = os.path.dirname(filename)
             self.model.img_model.load(filename)
 
@@ -347,7 +347,7 @@ class CalibrationController(object):
                                     directory=self.model.working_directories['image'],
                                     filter='*.spline')
 
-        if filename is not '':
+        if filename  != '':
             self.model.calibration_model.load_distortion(filename)
             self.widget.spline_filename_txt.setText(os.path.basename(filename))
 
@@ -533,7 +533,7 @@ class CalibrationController(object):
         filename = open_file_dialog(self.widget, caption="Load calibration...",
                                     directory=self.model.working_directories['calibration'],
                                     filter='*.poni')
-        if filename is not '':
+        if filename  != '':
             self.model.working_directories['calibration'] = os.path.dirname(filename)
             self.model.calibration_model.load(filename)
             if self.model.img_model.filename != '':
@@ -622,7 +622,7 @@ class CalibrationController(object):
 
         filename = save_file_dialog(self.widget, "Save calibration...",
                                     self.model.working_directories['calibration'], '*.poni')
-        if filename is not '':
+        if filename  != '':
             self.model.working_directories['calibration'] = os.path.dirname(filename)
             if not filename.rsplit('.', 1)[-1] == 'poni':
                 filename = filename + '.poni'
