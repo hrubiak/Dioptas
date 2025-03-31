@@ -230,7 +230,7 @@ class CalibrationModel(QtCore.QObject):
             mask = ring_mask
 
         # calculate the mean and standard deviation of this area
-        sub_data = np.array(self.img_model._img_data.ravel()[np.where(mask.ravel())], dtype=float64)
+        sub_data = np.array(self.img_model._img_data.ravel()[np.where(mask.ravel())], dtype=np.float64)
         sub_data[np.where(sub_data > upper_limit)] = np.NaN
         mean = np.nanmean(sub_data)
         std = np.nanstd(sub_data)
