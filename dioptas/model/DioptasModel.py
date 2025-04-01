@@ -263,7 +263,7 @@ class DioptasModel(QtCore.QObject):
         return self.configurations[self.configuration_ind]
 
     @property
-    def img_model(self):
+    def img_model(self) -> ImgModel: 
         """
         :rtype: ImgModel
         """

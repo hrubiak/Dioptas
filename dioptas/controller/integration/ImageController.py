@@ -29,9 +29,13 @@ from ...widgets.UtilityWidgets import open_file_dialog, open_files_dialog, save_
 # imports for type hinting in PyCharm -- DO NOT DELETE
 from ...widgets.integration import IntegrationWidget
 from ...model.DioptasModel import DioptasModel
+from ...model.ImgModel import ImgModel
 from ...model.util.HelperModule import get_partial_index, get_partial_value
 
 from .EpicsController import EpicsController
+
+# testing only: remove in production
+from epics import camonitor, caget, camonitor_clear
 
 
 class ImageController(object):
@@ -40,7 +44,7 @@ class ImageController(object):
     well as interaction with the image_view.
     """
 
-    def __init__(self, widget, dioptas_model):
+    def __init__(self, widget, dioptas_model: DioptasModel):
         """
         :param widget: Reference to IntegrationView
         :param dioptas_model: Reference to DioptasModel object
@@ -68,6 +72,31 @@ class ImageController(object):
         self.initialize()
         self.create_signals()
         self.create_mouse_behavior()
+
+        # testing only: remove in production
+
+        self.epics_datalog_file_pvname = 'XRDI:xrd_file_VAL'
+        self.setup_epics_datalog_file_monitor()
+
+    def setup_epics_datalog_file_monitor(self):
+        camonitor_clear(self.epics_datalog_file_pvname)
+        camonitor(self.epics_datalog_file_pvname, callback=self.epics_datalog_changed)
+
+    def epics_datalog_changed(self, *args, **kwargs):
+        self.epics_datalog_file_changed_emitted()
+
+    def epics_datalog_file_changed_emitted(self):
+        filename = caget(self.epics_datalog_file_pvname, as_string=True)
+        print(f'epics_datalog_file_changed_emitted {filename}')
+        
+        current_file = self.model.img_model
+        print(f'current_file {current_file}')
+        '''current_folder = os.path.split(current_file)[0]
+        new_file = os.path.join(current_folder, filename)
+        exists = os.path.isfile(new_file)
+        if exists:
+            print(f'{new_file} exists -> loading')
+            #self.load_data_file(new_file)'''
 
     def initialize(self):
         self.update_img()
