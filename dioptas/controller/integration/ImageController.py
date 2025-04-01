@@ -85,22 +85,23 @@ class ImageController(object):
         epics.camonitor_clear(self.epics_datalog_file_pvname)
         epics.camonitor(self.epics_datalog_file_pvname, callback=self.epics_datalog_changed)
 
-    def epics_datalog_changed(self, *args, **kwargs):
-        print(f'args {args}')
-        self.epics_datalog_file_changed_emitted()
+    def epics_datalog_changed(self, pvname=None, value=None, char_value=None, **kw):
+        print(f'pvname {pvname}')
+        self.epics_datalog_file_changed_emitted(value)
 
-    def epics_datalog_file_changed_emitted(self):
-        filename = epics.caget(self.epics_datalog_file_pvname, as_string=True, timeout=0.2)
+    def epics_datalog_file_changed_emitted(self, filename):
+        
         print(f'epics_datalog_file_changed_emitted {filename}')
         
-        '''current_file = self.model.img_model
-        print(f'current_file {current_file}')'''
-        '''current_folder = os.path.split(current_file)[0]
+        current_file = self.model.img_model.filename
+        print(f'current_file {current_file}')
+        current_folder = os.path.split(current_file)[0]
         new_file = os.path.join(current_folder, filename)
         exists = os.path.isfile(new_file)
+        print(f'new_file {new_file} ')
         if exists:
             print(f'{new_file} exists -> loading')
-            #self.load_data_file(new_file)'''
+            self.load_file(filename=new_file)
 
     def initialize(self):
         self.update_img()
