@@ -34,8 +34,11 @@ from ...model.util.HelperModule import get_partial_index, get_partial_value
 
 from .EpicsController import EpicsController
 
-# testing only: remove in production
-from epics import camonitor, caget, camonitor_clear
+
+try:
+    import epics
+except ImportError:
+    epics = None
 
 
 class ImageController(object):
@@ -79,18 +82,19 @@ class ImageController(object):
         self.setup_epics_datalog_file_monitor()
 
     def setup_epics_datalog_file_monitor(self):
-        camonitor_clear(self.epics_datalog_file_pvname)
-        camonitor(self.epics_datalog_file_pvname, callback=self.epics_datalog_changed)
+        epics.camonitor_clear(self.epics_datalog_file_pvname)
+        epics.camonitor(self.epics_datalog_file_pvname, callback=self.epics_datalog_changed)
 
     def epics_datalog_changed(self, *args, **kwargs):
+        print(f'args {args}')
         self.epics_datalog_file_changed_emitted()
 
     def epics_datalog_file_changed_emitted(self):
-        filename = caget(self.epics_datalog_file_pvname, as_string=True)
+        filename = epics.caget(self.epics_datalog_file_pvname, as_string=True, timeout=0.2)
         print(f'epics_datalog_file_changed_emitted {filename}')
         
-        current_file = self.model.img_model
-        print(f'current_file {current_file}')
+        '''current_file = self.model.img_model
+        print(f'current_file {current_file}')'''
         '''current_folder = os.path.split(current_file)[0]
         new_file = os.path.join(current_folder, filename)
         exists = os.path.isfile(new_file)
@@ -235,7 +239,7 @@ class ImageController(object):
         else:
             filenames = [filename]
 
-        if filenames is not None and len(filenames) is not 0:
+        if filenames != None and len(filenames) != 0:
             self.model.working_directories['image'] = os.path.dirname(str(filenames[0]))
             if len(filenames) == 1:
                 self.model.img_model.load(str(filenames[0]))
