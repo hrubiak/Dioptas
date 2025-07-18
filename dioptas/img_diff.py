@@ -42,9 +42,9 @@ for group_id in group_ids:
         diff = np.clip(img3 - img2, 0, 50)
         diff_images.append(diff)
 
-        # Save
+        # Save (flip vertically before saving)
         out_name = f'diff_{group_id:04d}.tif'
-        tifffile.imwrite(os.path.join(output_diff_folder, out_name), diff)
+        tifffile.imwrite(os.path.join(output_diff_folder, out_name), diff[::-1])
         print(f"Saved group diff image: {out_name}")
     except KeyError:
         print(f"Group {group_id} missing index 2 or 3; skipping.")
@@ -57,6 +57,7 @@ for i in range(len(diff_images) - 1):
 
     diff_of_diff = np.clip(diff_images[i + 1] - diff_images[i], 0, 50)
 
+    # Save (flip vertically before saving)
     out_name = f'diffdiff_{group_from:04d}_to_{group_to:04d}.tif'
-    tifffile.imwrite(os.path.join(output_diffdiff_folder, out_name), diff_of_diff)
+    tifffile.imwrite(os.path.join(output_diffdiff_folder, out_name), diff_of_diff[::-1])
     print(f"Saved diff-of-diff image: {out_name}")
