@@ -5,7 +5,7 @@ import tifffile
 import matplotlib.pyplot as plt
 
 # ---- Configuration ----
-tif_folder = "/Volumes/T7 Touch/Data_analysis/2025-2/20250624-melt-devel/xrd/heating/4-pulse"
+tif_folder = '/folder'
 output_diff_folder = os.path.join(tif_folder, "diff_images")
 output_diffdiff_folder = os.path.join(tif_folder, "diff_of_diff_images")
 pattern = r'(.+?)_(\d{5})_(\d{4})\.tif'  # matches name_00xx_00yy.tif
