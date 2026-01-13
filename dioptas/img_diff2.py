@@ -4,19 +4,29 @@ import numpy as np
 import tifffile
 
 # ---- Configuration ----
-base_folder = '/Volumes/T7 Touch/Data_analysis/2025-2/20250709-melt-exp/xrd/P3'  # folder that contains folders 0001, 0002, ...
+base_folder = '/Volumes/T7 Touch/Data_analysis/2025-2/20250709-melt-exp/xrd/P3'
 output_diff_folder = os.path.join(base_folder, "diff_images")
 output_diffdiff_folder = os.path.join(base_folder, "diff_of_diff_images")
+
 pattern = r'(.+?)_(\d{5})_(\d{4})\.tif'  # e.g. prefix_00004_0005.tif
+clip_lo, clip_hi = 0, 50
 
 # ---- Create output folders ----
 os.makedirs(output_diff_folder, exist_ok=True)
 os.makedirs(output_diffdiff_folder, exist_ok=True)
 
-# ---- Step 1: Build a mapping of group_id -> {index_str: filepath} ----
+def read_tif_flipped(path: str) -> np.ndarray:
+    return tifffile.imread(path)[::-1].astype(np.float32)
+
+def write_tif_flip_back(path: str, arr: np.ndarray) -> None:
+    tifffile.imwrite(path, arr[::-1])
+
+# ---- Step 1: Build mapping group_id -> {index_str: filepath} ----
 file_dict = {}
 
-folder_names = sorted([f for f in os.listdir(base_folder) if os.path.isdir(os.path.join(base_folder, f))])
+folder_names = sorted(
+    [f for f in os.listdir(base_folder) if os.path.isdir(os.path.join(base_folder, f))]
+)
 
 for folder_name in folder_names:
     folder_path = os.path.join(base_folder, folder_name)
@@ -28,35 +38,43 @@ for folder_name in folder_names:
             prefix, group_str, index_str = match.groups()
             file_dict.setdefault(group_str, {})[index_str] = os.path.join(folder_path, fname)
 
-# ---- Step 2: Compute and save _0005 - _0004 within each group ----
-group_ids = sorted(file_dict.keys())
+# Sort groups numerically, but keep the original string ids for naming
+group_ids = sorted(file_dict.keys(), key=lambda s: int(s))
+
+# ---- Step 2: Compute and save within-group diff: _0005 - _0004 ----
+img5_cache = {}  # group_id -> flipped float32 image for _0005 (if present)
 
 for group_id in group_ids:
     files = file_dict[group_id]
-    try:
-        img4 = tifffile.imread(files['0004'])[::-1].astype(np.float32)
-        img5 = tifffile.imread(files['0005'])[::-1].astype(np.float32)
-        diff = np.clip(img5 - img4, 0, 50)
 
-        # Save result (flip back)
-        out_path = os.path.join(output_diff_folder, f'diff_{group_id}.tif')
-        tifffile.imwrite(out_path, diff[::-1])
-        print(f"Saved within-group diff: {out_path}")
-    except KeyError:
-        print(f"Missing _0004 or _0005 for group {group_id}, skipping.")
+    if '0005' in files:
+        img5_cache[group_id] = read_tif_flipped(files['0005'])
 
-# ---- Step 3: Compute and save _0005 - previous _0005 between groups ----
-for i in range(1, len(group_ids)):
-    prev_id = group_ids[i - 1]
-    curr_id = group_ids[i]
-    try:
-        img_prev = tifffile.imread(file_dict[prev_id]['0005'])[::-1].astype(np.float32)
-        img_curr = tifffile.imread(file_dict[curr_id]['0005'])[::-1].astype(np.float32)
-        diff = np.clip(img_curr - img_prev, 0, 50)
+    if '0004' not in files or '0005' not in files:
+        print(f"Missing _0004 or _0005 for group {group_id}, skipping within-group diff.")
+        continue
 
-        # Save result (flip back)
-        out_path = os.path.join(output_diffdiff_folder, f'diffdiff_{prev_id}_to_{curr_id}.tif')
-        tifffile.imwrite(out_path, diff[::-1])
-        print(f"Saved between-group diff: {out_path}")
-    except KeyError:
-        print(f"Missing _0005 in group {prev_id} or {curr_id}, skipping.")
+    img4 = read_tif_flipped(files['0004'])
+    img5 = img5_cache[group_id]
+
+    diff = np.clip(img5 - img4, clip_lo, clip_hi)
+
+    out_path = os.path.join(output_diff_folder, f'diff_{group_id}.tif')
+    write_tif_flip_back(out_path, diff)
+    print(f"Saved within-group diff: {out_path}")
+
+# ---- Step 3: Compute and save between-group diff: _0005(curr) - _0005(prev) ----
+valid_groups = [gid for gid in group_ids if gid in img5_cache]
+
+for i in range(1, len(valid_groups)):
+    prev_id = valid_groups[i - 1]
+    curr_id = valid_groups[i]
+
+    img_prev = img5_cache[prev_id]
+    img_curr = img5_cache[curr_id]
+
+    diff = np.clip(img_curr - img_prev, clip_lo, clip_hi)
+
+    out_path = os.path.join(output_diffdiff_folder, f'diffdiff_{prev_id}_to_{curr_id}.tif')
+    write_tif_flip_back(out_path, diff)
+    print(f"Saved between-group diff: {out_path}")
